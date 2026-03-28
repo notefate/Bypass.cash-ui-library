@@ -75,7 +75,7 @@ local STREAMER_MASK_NAME = "Hidden User"
 local STREAMER_MASK_DISPLAY = "Hidden Display"
 local STREAMER_AVATAR = "rbxthumb://type=AvatarHeadShot&id=1&w=48&h=48"
 
-Bypass.StreamerTextCache = Bypass.StreamerTextCache or setmetatable({}, { __mode = "k" })
+-- Streamer mode removed: no global text masking cache required
 Bypass.StreamerRoots = Bypass.StreamerRoots or setmetatable({}, { __mode = "k" })
 
 local function getViewportSize()
@@ -136,8 +136,8 @@ function Bypass:GetResponsiveWindowBounds(profile)
     local marginY = profile.isPhone and 28 or 100
     local rawMaxWidth = math.max(300, math.floor(profile.viewport.X - marginX))
     local rawMaxHeight = math.max(320, math.floor(profile.viewport.Y - marginY))
-    local minWidth = math.min(profile.isPhone and 320 or 620, rawMaxWidth)
-    local minHeight = math.min(profile.isPhone and 390 or 440, rawMaxHeight)
+    local minWidth = math.min(profile.isPhone and 320 or 520, rawMaxWidth)
+    local minHeight = math.min(profile.isPhone and 390 or 420, rawMaxHeight)
 
     return {
         min = vec2(minWidth, minHeight),
@@ -150,8 +150,8 @@ function Bypass:GetResponsiveWindowSize(requestedSize)
     local bounds = self:GetResponsiveWindowBounds(profile)
     local requestedWidth = requestedSize and requestedSize.X.Offset or 0
     local requestedHeight = requestedSize and requestedSize.Y.Offset or 0
-    local baseWidth = profile.isPhone and 350 or 690
-    local baseHeight = profile.isPhone and 420 or 500
+    local baseWidth = profile.isPhone and 350 or 520
+    local baseHeight = profile.isPhone and 420 or 480
     local width = math.clamp(requestedWidth > 0 and requestedWidth or baseWidth, bounds.min.X, bounds.max.X)
     local height = math.clamp(requestedHeight > 0 and requestedHeight or baseHeight, bounds.min.Y, bounds.max.Y)
 
@@ -183,78 +183,9 @@ function Bypass:CenterFrame(frame)
     )
 end
 
-function Bypass:RegisterStreamerRoot(root)
-    if not root or self.StreamerRoots[root] then return end
-    self.StreamerRoots[root] = true
+-- Streamer root registration removed (feature deprecated)
 
-    local function cacheObject(object)
-        if object:IsA("TextLabel") or object:IsA("TextButton") or object:IsA("TextBox") then
-            local entry = self.StreamerTextCache[object] or {}
-            if entry.Text == nil then
-                entry.Text = object.Text
-            end
-            if object:IsA("TextBox") and entry.PlaceholderText == nil then
-                entry.PlaceholderText = object.PlaceholderText
-            end
-            self.StreamerTextCache[object] = entry
-        end
-    end
-
-    if root:IsA("GuiObject") then
-        cacheObject(root)
-    end
-    for _, descendant in ipairs(root:GetDescendants()) do
-        cacheObject(descendant)
-    end
-
-    root.DescendantAdded:Connect(function(descendant)
-        cacheObject(descendant)
-        if Flags["Bypass_StreamerMode"] then
-            task.defer(function()
-                if descendant and descendant.Parent then
-                    local entry = self.StreamerTextCache[descendant]
-                    if entry then
-                        if descendant:IsA("TextLabel") or descendant:IsA("TextButton") or descendant:IsA("TextBox") then
-                            descendant.Text = maskIdentityText(entry.Text)
-                        end
-                        if descendant:IsA("TextBox") then
-                            descendant.PlaceholderText = maskIdentityText(entry.PlaceholderText)
-                        end
-                    end
-                end
-            end)
-        end
-    end)
-end
-
-function Bypass:ApplyStreamerMode(window, state)
-    Flags["Bypass_StreamerMode"] = state
-    self:RegisterStreamerRoot(window.Items.Wrapper)
-
-    local playerGui = lp:FindFirstChildOfClass("PlayerGui")
-    if playerGui then
-        self:RegisterStreamerRoot(playerGui)
-    end
-
-    if window.Items.Username then
-        window.Items.Username.Text = state and (STREAMER_MASK_DISPLAY .. " (@" .. STREAMER_MASK_NAME .. ")") or getIdentityText()
-    end
-
-    if window.Items.Avatar then
-        window.Items.Avatar.Image = state and STREAMER_AVATAR or ("rbxthumb://type=AvatarHeadShot&id=" .. lp.UserId .. "&w=48&h=48")
-    end
-
-    for object, entry in pairs(self.StreamerTextCache) do
-        if object and object.Parent then
-            if entry.Text ~= nil then
-                object.Text = state and maskIdentityText(entry.Text) or entry.Text
-            end
-            if object:IsA("TextBox") and entry.PlaceholderText ~= nil then
-                object.PlaceholderText = state and maskIdentityText(entry.PlaceholderText) or entry.PlaceholderText
-            end
-        end
-    end
-end
+-- Streamer mode removed: ApplyStreamerMode is no longer used
 
 for _, path in Bypass.Folders do
     pcall(function() makefolder(Bypass.Directory .. path) end)
@@ -459,6 +390,16 @@ function Bypass:Window(properties)
     })
     Bypass:Create("UICorner", { Parent = Items.LogoBlock, CornerRadius = dim(0, 4) })
     Bypass:Themify(Items.LogoBlock, "accent", "BackgroundColor3")
+    -- small logo icon (match toggle/open-close image)
+    Items.LogoIcon = Bypass:Create("ImageLabel", {
+        Parent = Items.LogoBlock,
+        AnchorPoint = vec2(0.5, 0.5),
+        Position = dim2(0.5, 0.5, 0, 0),
+        Size = dim2(1, 0, 1, 0),
+        BackgroundTransparency = 1,
+        Image = "rbxassetid://89870805889915",
+        ZIndex = 5
+    })
 
     Items.LogoText = Bypass:Create("TextLabel", {
         Parent = Items.Header, Text = Cfg.Title, TextColor3 = themes.preset.text,
@@ -521,28 +462,7 @@ function Bypass:Window(properties)
         Parent = Items.Window, AnchorPoint = vec2(0, 1), Position = dim2(0, 0, 1, 0), 
         Size = dim2(1, 0, 0, 60), BackgroundTransparency = 1, BorderSizePixel = 0, ZIndex = 2 
     })
-
-    local headshot = "rbxthumb://type=AvatarHeadShot&id="..lp.UserId.."&w=48&h=48"
-    Items.AvatarFrame = Bypass:Create("Frame", {
-        Parent = Items.Footer, AnchorPoint = vec2(0, 0.5), Position = dim2(0, 20, 0.5, 0), 
-        Size = dim2(0, 28, 0, 28), BackgroundColor3 = themes.preset.element, BorderSizePixel = 0, ZIndex = 5
-    })
-    Bypass:Themify(Items.AvatarFrame, "element", "BackgroundColor3")
-    Bypass:Create("UICorner", { Parent = Items.AvatarFrame, CornerRadius = dim(0, 6) })
-    
-    Items.Avatar = Bypass:Create("ImageLabel", { 
-        Parent = Items.AvatarFrame, AnchorPoint = vec2(0.5, 0.5), Position = dim2(0.5, 0, 0.5, 0), 
-        Size = dim2(1, 0, 1, 0), BackgroundTransparency = 1, Image = headshot, ZIndex = 6 
-    })
-    Bypass:Create("UICorner", { Parent = Items.Avatar, CornerRadius = dim(0, 6) })
-
-    Items.Username = Bypass:Create("TextLabel", {
-        Parent = Items.Footer, Text = getIdentityText(), TextColor3 = themes.preset.text,
-        AnchorPoint = vec2(0, 0), Position = dim2(0, 58, 0, 13), Size = dim2(0, 200, 0, 14),
-        BackgroundTransparency = 1, FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Medium), TextSize = 13, TextXAlignment = Enum.TextXAlignment.Left, ZIndex = 5
-    })
-    Bypass:Themify(Items.Username, "text", "TextColor3")
-
+    -- footer remains for controls; user identity moved to header center
     Items.Status = Bypass:Create("TextLabel", {
         Parent = Items.Footer, Text = "Status : Premium", TextColor3 = themes.preset.subtext,
         AnchorPoint = vec2(0, 0), Position = dim2(0, 58, 0, 28), Size = dim2(0, 200, 0, 12),
@@ -565,11 +485,35 @@ function Bypass:Window(properties)
         BackgroundTransparency = 1, ClipsDescendants = true 
     })
 
-    Bypass:RegisterStreamerRoot(Items.Wrapper)
-    local playerGui = lp:FindFirstChildOfClass("PlayerGui")
-    if playerGui then
-        Bypass:RegisterStreamerRoot(playerGui)
-    end
+    -- Create centered user info in header (avatar, display name, username)
+    local headshot = "rbxthumb://type=AvatarHeadShot&id="..lp.UserId.."&w=48&h=48"
+    Items.CenterInfo = Bypass:Create("Frame", {
+        Parent = Items.Header, AnchorPoint = vec2(0.5, 0), Position = dim2(0.5, 0, 0, 6),
+        Size = dim2(0, 220, 0, 36), BackgroundTransparency = 1, ZIndex = 5
+    })
+
+    Items.AvatarFrame = Bypass:Create("Frame", {
+        Parent = Items.CenterInfo, AnchorPoint = vec2(0, 0.5), Position = dim2(0, 0, 0.5, 0),
+        Size = dim2(0, 28, 0, 28), BackgroundColor3 = themes.preset.element, BorderSizePixel = 0, ZIndex = 6
+    })
+    Bypass:Themify(Items.AvatarFrame, "element", "BackgroundColor3")
+    Bypass:Create("UICorner", { Parent = Items.AvatarFrame, CornerRadius = dim(0, 6) })
+
+    Items.Avatar = Bypass:Create("ImageLabel", {
+        Parent = Items.AvatarFrame, AnchorPoint = vec2(0.5, 0.5), Position = dim2(0.5, 0, 0.5, 0),
+        Size = dim2(1, 0, 1, 0), BackgroundTransparency = 1, Image = headshot, ZIndex = 7
+    })
+    Bypass:Create("UICorner", { Parent = Items.Avatar, CornerRadius = dim(0, 6) })
+
+    Items.Username = Bypass:Create("TextLabel", {
+        Parent = Items.CenterInfo, Text = getIdentityText(), TextColor3 = themes.preset.text,
+        AnchorPoint = vec2(0, 0), Position = dim2(0, 44, 0, 6), Size = dim2(1, -44, 0, 16),
+        BackgroundTransparency = 1, FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Medium), TextSize = 13, TextXAlignment = Enum.TextXAlignment.Left, ZIndex = 6
+    })
+    Bypass:Themify(Items.Username, "text", "TextColor3")
+
+    -- Streamer mode now only affects the header username/display name.
+    -- No automatic registration of external GUIs to avoid masking unrelated text.
 
     -- Dragging Logic
     local Dragging, DragInput, DragStart, StartPos
@@ -1586,10 +1530,6 @@ function Bypass:Configs(window)
     task.delay(1, function() window.Tweening = false end)
 
     local ServerSection = Tab:Section({Name = "Server", Side = "Right"})
-    ServerSection:Toggle({Name = "Streamer Mode",Flag = "Bypass_StreamerMode",Callback = function(state)
-            Bypass:ApplyStreamerMode(window, state)
-        end
-    })
 
     ServerSection:Button({ Name = "Rejoin Server", Callback = function() game:GetService("TeleportService"):Teleport(game.PlaceId, Players.LocalPlayer) end })
 
