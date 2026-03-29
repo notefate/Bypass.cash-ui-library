@@ -136,8 +136,8 @@ function Bypass:GetResponsiveWindowBounds(profile)
     local marginY = profile.isPhone and 28 or 100
     local rawMaxWidth = math.max(300, math.floor(profile.viewport.X - marginX))
     local rawMaxHeight = math.max(320, math.floor(profile.viewport.Y - marginY))
-    local minWidth = math.min(profile.isPhone and 280 or 280, rawMaxWidth)
-    local minHeight = math.min(profile.isPhone and 380 or 380, rawMaxHeight)
+    local minWidth = math.min(profile.isPhone and 260 or 260, rawMaxWidth)
+    local minHeight = math.min(profile.isPhone and 370 or 370, rawMaxHeight)
 
     return {
         min = vec2(minWidth, minHeight),
@@ -150,8 +150,8 @@ function Bypass:GetResponsiveWindowSize(requestedSize)
     local bounds = self:GetResponsiveWindowBounds(profile)
     local requestedWidth = requestedSize and requestedSize.X.Offset or 0
     local requestedHeight = requestedSize and requestedSize.Y.Offset or 0
-    local baseWidth = profile.isPhone and 280 or 280
-    local baseHeight = profile.isPhone and 380 or 380
+    local baseWidth = profile.isPhone and 260 or 260
+    local baseHeight = profile.isPhone and 370 or 370
     local width = math.clamp(requestedWidth > 0 and requestedWidth or baseWidth, bounds.min.X, bounds.max.X)
     local height = math.clamp(requestedHeight > 0 and requestedHeight or baseHeight, bounds.min.Y, bounds.max.Y)
 
@@ -381,6 +381,22 @@ function Bypass:Window(properties)
 
     -- Logo removed per user request
 
+    Items.LogoText = Bypass:Create("TextLabel", {
+        Parent = Items.Header, Text = Cfg.Title, TextColor3 = themes.preset.text,
+        AnchorPoint = vec2(0.5, 0), Position = dim2(0.5, 0, 0, 8), 
+        Size = dim2(0, 200, 0, 14),
+        BackgroundTransparency = 1, FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.SemiBold), TextSize = 12, TextXAlignment = Enum.TextXAlignment.Center, ZIndex = 4
+    })
+    Bypass:Themify(Items.LogoText, "text", "TextColor3")
+
+    Items.SubLogoText = Bypass:Create("TextLabel", {
+        Parent = Items.Header, Text = Cfg.Subtitle, TextColor3 = themes.preset.subtext,
+        AnchorPoint = vec2(0.5, 0), Position = dim2(0.5, 0, 0, 24), 
+        Size = dim2(0, 200, 0, 10),
+        BackgroundTransparency = 1, FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Medium), TextSize = 9, TextXAlignment = Enum.TextXAlignment.Center, ZIndex = 4
+    })
+    Bypass:Themify(Items.SubLogoText, "subtext", "TextColor3")
+
     Items.TabHolder = Bypass:Create("Frame", { 
         Parent = Items.Header, AnchorPoint = vec2(0.5, 0.5), Position = dim2(0.5, 0, 0.5, 0),
         Size = dim2(1, -280, 1, 0), BackgroundTransparency = 1, ZIndex = 4
@@ -407,7 +423,7 @@ function Bypass:Window(properties)
 
     Items.Footer = Bypass:Create("Frame", { 
         Parent = Items.Window, AnchorPoint = vec2(0, 1), Position = dim2(0, 0, 1, 0), 
-        Size = dim2(1, 0, 0, 30), BackgroundTransparency = 1, BorderSizePixel = 0, ZIndex = 2 
+        Size = dim2(1, 0, 0, 40), BackgroundTransparency = 1, BorderSizePixel = 0, ZIndex = 2 
     })
 
     Items.SettingsBtn = Bypass:Create("ImageButton", {
@@ -420,8 +436,15 @@ function Bypass:Window(properties)
         if Cfg.SettingsTabOpen then Cfg.SettingsTabOpen() end
     end)
 
+    Items.FooterStatus = Bypass:Create("TextLabel", {
+        Parent = Items.Footer, Text = "Status: Premium", TextColor3 = themes.preset.subtext,
+        AnchorPoint = vec2(0, 0.5), Position = dim2(0, 8, 0.5, 0), Size = dim2(0, 150, 0, 14),
+        BackgroundTransparency = 1, FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Medium), TextSize = 9, TextXAlignment = Enum.TextXAlignment.Left, ZIndex = 5
+    })
+    Bypass:Themify(Items.FooterStatus, "subtext", "TextColor3")
+
     Items.PageHolder = Bypass:Create("Frame", { 
-        Parent = Items.Window, Position = dim2(0, 0, 0, 56), Size = dim2(1, 0, 1, -86), 
+        Parent = Items.Window, Position = dim2(0, 0, 0, 56), Size = dim2(1, 0, 1, -96), 
         BackgroundTransparency = 1, ClipsDescendants = true 
     })
 
@@ -539,32 +562,8 @@ function Bypass:Window(properties)
     Bypass:Themify(ToggleButton, "control_dark", "BackgroundColor3")
     Bypass:Themify(Bypass:Create("UIStroke", { Parent = ToggleButton, Color = themes.preset.outline, Thickness = 1.5 }), "outline", "Color")
 
-    local isTDrag, tDragStart, tStartPos, hasTDragged = false, nil, nil, false
-    ToggleButton.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            isTDrag = true
-            hasTDragged = false
-            tDragStart = input.Position
-            tStartPos = ToggleButton.Position
-        end
-    end)
-    ToggleButton.InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            isTDrag = false
-            if not hasTDragged then
-                Cfg.ToggleMenu(true)
-            end
-        end
-    end)
-    InputService.InputChanged:Connect(function(input)
-        if isTDrag and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-            local delta = input.Position - tDragStart
-            if delta.Magnitude > 5 then
-                hasTDragged = true
-                ToggleButton.Position = dim_offset(tStartPos.X.Offset + delta.X, tStartPos.Y.Offset + delta.Y)
-                Bypass:ClampFrameToViewport(ToggleButton)
-            end
-        end
+    ToggleButton.MouseButton1Click:Connect(function()
+        Cfg.ToggleMenu(true)
     end)
 
     -- Minimize and close button handlers removed
