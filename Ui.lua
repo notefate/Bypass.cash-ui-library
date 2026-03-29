@@ -136,8 +136,8 @@ function Bypass:GetResponsiveWindowBounds(profile)
     local marginY = profile.isPhone and 28 or 100
     local rawMaxWidth = math.max(300, math.floor(profile.viewport.X - marginX))
     local rawMaxHeight = math.max(320, math.floor(profile.viewport.Y - marginY))
-    local minWidth = math.min(profile.isPhone and 320 or 520, rawMaxWidth)
-    local minHeight = math.min(profile.isPhone and 390 or 420, rawMaxHeight)
+    local minWidth = math.min(profile.isPhone and 300 or 320, rawMaxWidth)
+    local minHeight = math.min(profile.isPhone and 390 or 400, rawMaxHeight)
 
     return {
         min = vec2(minWidth, minHeight),
@@ -150,8 +150,8 @@ function Bypass:GetResponsiveWindowSize(requestedSize)
     local bounds = self:GetResponsiveWindowBounds(profile)
     local requestedWidth = requestedSize and requestedSize.X.Offset or 0
     local requestedHeight = requestedSize and requestedSize.Y.Offset or 0
-    local baseWidth = profile.isPhone and 350 or 520
-    local baseHeight = profile.isPhone and 420 or 480
+    local baseWidth = profile.isPhone and 300 or 320
+    local baseHeight = profile.isPhone and 390 or 400
     local width = math.clamp(requestedWidth > 0 and requestedWidth or baseWidth, bounds.min.X, bounds.max.X)
     local height = math.clamp(requestedHeight > 0 and requestedHeight or baseHeight, bounds.min.Y, bounds.max.Y)
 
@@ -381,8 +381,8 @@ function Bypass:Window(properties)
 
     Items.LogoBlock = Bypass:Create("Frame", {
         Parent = Items.Header, 
-        AnchorPoint = vec2(0, 0.5), 
-        Position = dim2(0, 18, 0.5, 0), 
+        AnchorPoint = vec2(0, 0), 
+        Position = dim2(0, 18, 0, 16), 
         Size = dim2(0, 18, 0, 18),
         BackgroundTransparency = 0,
         BorderSizePixel = 0,
@@ -507,10 +507,17 @@ function Bypass:Window(properties)
 
     Items.Username = Bypass:Create("TextLabel", {
         Parent = Items.CenterInfo, Text = getIdentityText(), TextColor3 = themes.preset.text,
-        AnchorPoint = vec2(0, 0), Position = dim2(0, 44, 0, 6), Size = dim2(1, -44, 0, 16),
-        BackgroundTransparency = 1, FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Medium), TextSize = 13, TextXAlignment = Enum.TextXAlignment.Left, ZIndex = 6
+        AnchorPoint = vec2(0, 0), Position = dim2(0, 44, 0, 4), Size = dim2(1, -44, 0, 12),
+        BackgroundTransparency = 1, FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Medium), TextSize = 11, TextXAlignment = Enum.TextXAlignment.Left, ZIndex = 6
     })
     Bypass:Themify(Items.Username, "text", "TextColor3")
+
+    Items.Status = Bypass:Create("TextLabel", {
+        Parent = Items.CenterInfo, Text = "Status: Premium", TextColor3 = themes.preset.subtext,
+        AnchorPoint = vec2(0, 0), Position = dim2(0, 44, 0, 18), Size = dim2(1, -44, 0, 10),
+        BackgroundTransparency = 1, FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Medium), TextSize = 9, TextXAlignment = Enum.TextXAlignment.Left, ZIndex = 6
+    })
+    Bypass:Themify(Items.Status, "subtext", "TextColor3")
 
     -- Streamer mode now only affects the header username/display name.
     -- No automatic registration of external GUIs to avoid masking unrelated text.
@@ -571,7 +578,7 @@ function Bypass:Window(properties)
         end
         Items.Wrapper.Visible = uiVisible
         if Items.ToggleButton then
-            Items.ToggleButton.Visible = not uiVisible
+            Items.ToggleButton.Visible = true
         end
     end
 
@@ -585,7 +592,7 @@ function Bypass:Window(properties)
         BackgroundTransparency = 0,
         BackgroundColor3 = themes.preset.control_dark,
         Image = "rbxassetid://89870805889915",
-        Visible = false,
+        Visible = true,
         ZIndex = 10000,
     })
     Items.ToggleButton = ToggleButton
