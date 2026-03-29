@@ -136,8 +136,8 @@ function Bypass:GetResponsiveWindowBounds(profile)
     local marginY = profile.isPhone and 28 or 100
     local rawMaxWidth = math.max(300, math.floor(profile.viewport.X - marginX))
     local rawMaxHeight = math.max(320, math.floor(profile.viewport.Y - marginY))
-    local minWidth = math.min(profile.isPhone and 300 or 320, rawMaxWidth)
-    local minHeight = math.min(profile.isPhone and 390 or 400, rawMaxHeight)
+    local minWidth = math.min(profile.isPhone and 280 or 280, rawMaxWidth)
+    local minHeight = math.min(profile.isPhone and 380 or 380, rawMaxHeight)
 
     return {
         min = vec2(minWidth, minHeight),
@@ -150,8 +150,8 @@ function Bypass:GetResponsiveWindowSize(requestedSize)
     local bounds = self:GetResponsiveWindowBounds(profile)
     local requestedWidth = requestedSize and requestedSize.X.Offset or 0
     local requestedHeight = requestedSize and requestedSize.Y.Offset or 0
-    local baseWidth = profile.isPhone and 300 or 320
-    local baseHeight = profile.isPhone and 390 or 400
+    local baseWidth = profile.isPhone and 280 or 280
+    local baseHeight = profile.isPhone and 380 or 380
     local width = math.clamp(requestedWidth > 0 and requestedWidth or baseWidth, bounds.min.X, bounds.max.X)
     local height = math.clamp(requestedHeight > 0 and requestedHeight or baseHeight, bounds.min.Y, bounds.max.Y)
 
@@ -379,43 +379,7 @@ function Bypass:Window(properties)
     })
     Bypass:Themify(Items.HeaderLine, "outline", "BackgroundColor3")
 
-    Items.LogoBlock = Bypass:Create("Frame", {
-        Parent = Items.Header, 
-        AnchorPoint = vec2(0, 0), 
-        Position = dim2(0, 18, 0, 16), 
-        Size = dim2(0, 18, 0, 18),
-        BackgroundTransparency = 0,
-        BorderSizePixel = 0,
-        ZIndex = 4
-    })
-    Bypass:Create("UICorner", { Parent = Items.LogoBlock, CornerRadius = dim(0, 4) })
-    Bypass:Themify(Items.LogoBlock, "accent", "BackgroundColor3")
-    -- small logo icon (match toggle/open-close image)
-    Items.LogoIcon = Bypass:Create("ImageLabel", {
-        Parent = Items.LogoBlock,
-        AnchorPoint = vec2(0.5, 0.5),
-        Position = dim2(0.5, 0.5, 0, 0),
-        Size = dim2(1, 0, 1, 0),
-        BackgroundTransparency = 1,
-        Image = "rbxassetid://89870805889915",
-        ZIndex = 5
-    })
-
-    Items.LogoText = Bypass:Create("TextLabel", {
-        Parent = Items.Header, Text = Cfg.Title, TextColor3 = themes.preset.text,
-        AnchorPoint = vec2(0, 0), Position = dim2(0, 44, 0, 12), 
-        Size = dim2(0, 150, 0, 14),
-        BackgroundTransparency = 1, FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.SemiBold), TextSize = 13, TextXAlignment = Enum.TextXAlignment.Left, ZIndex = 4
-    })
-    Bypass:Themify(Items.LogoText, "text", "TextColor3")
-
-    Items.SubLogoText = Bypass:Create("TextLabel", {
-        Parent = Items.Header, Text = Cfg.Subtitle, TextColor3 = themes.preset.subtext,
-        AnchorPoint = vec2(0, 0), Position = dim2(0, 44, 0, 28), 
-        Size = dim2(0, 170, 0, 12),
-        BackgroundTransparency = 1, FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Medium), TextSize = 11, TextXAlignment = Enum.TextXAlignment.Left, ZIndex = 4
-    })
-    Bypass:Themify(Items.SubLogoText, "subtext", "TextColor3")
+    -- Logo removed per user request
 
     Items.TabHolder = Bypass:Create("Frame", { 
         Parent = Items.Header, AnchorPoint = vec2(0.5, 0.5), Position = dim2(0.5, 0, 0.5, 0),
@@ -439,39 +403,15 @@ function Bypass:Window(properties)
         Padding = dim(0, 8)
     })
 
-    local function createHeaderCircle(name)
-        local button = Bypass:Create("TextButton", {
-            Parent = Items.ControlHolder,
-            Name = name,
-            Size = dim2(0, 18, 0, 18),
-            BackgroundColor3 = themes.preset.control_dark,
-            BorderSizePixel = 0,
-            Text = "",
-            ZIndex = 6,
-        })
-        Bypass:Themify(button, "control_dark", "BackgroundColor3")
-        Bypass:Create("UICorner", { Parent = button, CornerRadius = dim(1, 0) })
-        Bypass:Themify(Bypass:Create("UIStroke", { Parent = button, Color = themes.preset.outline, Thickness = 1 }), "outline", "Color")
-        return button
-    end
-
-    Items.MinimizeBtn = createHeaderCircle("Minimize")
-    Items.CloseBtn = createHeaderCircle("Close")
+    -- Minimize and close buttons removed per user request
 
     Items.Footer = Bypass:Create("Frame", { 
         Parent = Items.Window, AnchorPoint = vec2(0, 1), Position = dim2(0, 0, 1, 0), 
-        Size = dim2(1, 0, 0, 60), BackgroundTransparency = 1, BorderSizePixel = 0, ZIndex = 2 
+        Size = dim2(1, 0, 0, 30), BackgroundTransparency = 1, BorderSizePixel = 0, ZIndex = 2 
     })
-    -- footer remains for controls; user identity moved to header center
-    Items.Status = Bypass:Create("TextLabel", {
-        Parent = Items.Footer, Text = "Status : Premium", TextColor3 = themes.preset.subtext,
-        AnchorPoint = vec2(0, 0), Position = dim2(0, 58, 0, 28), Size = dim2(0, 200, 0, 12),
-        BackgroundTransparency = 1, FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Medium), TextSize = 11, TextXAlignment = Enum.TextXAlignment.Left, ZIndex = 5
-    })
-    Bypass:Themify(Items.Status, "subtext", "TextColor3")
 
     Items.SettingsBtn = Bypass:Create("ImageButton", {
-        Parent = Items.Footer, AnchorPoint = vec2(1, 0.5), Position = dim2(1, -22, 0.5, 0),
+        Parent = Items.Footer, AnchorPoint = vec2(1, 0.5), Position = dim2(1, -8, 0.5, 0),
         Size = dim2(0, 18, 0, 18), BackgroundTransparency = 1, Image = "rbxassetid://11293977610", ImageColor3 = themes.preset.subtext, ZIndex = 5
     })
     Bypass:Themify(Items.SettingsBtn, "subtext", "ImageColor3")
@@ -481,19 +421,19 @@ function Bypass:Window(properties)
     end)
 
     Items.PageHolder = Bypass:Create("Frame", { 
-        Parent = Items.Window, Position = dim2(0, 0, 0, 56), Size = dim2(1, 0, 1, -116), 
+        Parent = Items.Window, Position = dim2(0, 0, 0, 56), Size = dim2(1, 0, 1, -86), 
         BackgroundTransparency = 1, ClipsDescendants = true 
     })
 
-    -- Create centered user info in header (avatar, display name, username)
+    -- Create top-right user info (avatar, display name, username, status)
     local headshot = "rbxthumb://type=AvatarHeadShot&id="..lp.UserId.."&w=48&h=48"
-    Items.CenterInfo = Bypass:Create("Frame", {
-        Parent = Items.Header, AnchorPoint = vec2(0.5, 0), Position = dim2(0.5, 0, 0, 6),
-        Size = dim2(0, 220, 0, 36), BackgroundTransparency = 1, ZIndex = 5
+    Items.RightInfo = Bypass:Create("Frame", {
+        Parent = Items.Header, AnchorPoint = vec2(1, 0), Position = dim2(1, -8, 0, 6),
+        Size = dim2(0, 150, 0, 40), BackgroundTransparency = 1, ZIndex = 5
     })
 
     Items.AvatarFrame = Bypass:Create("Frame", {
-        Parent = Items.CenterInfo, AnchorPoint = vec2(0, 0.5), Position = dim2(0, 0, 0.5, 0),
+        Parent = Items.RightInfo, AnchorPoint = vec2(1, 0), Position = dim2(1, 0, 0, 0),
         Size = dim2(0, 28, 0, 28), BackgroundColor3 = themes.preset.element, BorderSizePixel = 0, ZIndex = 6
     })
     Bypass:Themify(Items.AvatarFrame, "element", "BackgroundColor3")
@@ -506,16 +446,16 @@ function Bypass:Window(properties)
     Bypass:Create("UICorner", { Parent = Items.Avatar, CornerRadius = dim(0, 6) })
 
     Items.Username = Bypass:Create("TextLabel", {
-        Parent = Items.CenterInfo, Text = getIdentityText(), TextColor3 = themes.preset.text,
-        AnchorPoint = vec2(0, 0), Position = dim2(0, 44, 0, 4), Size = dim2(1, -44, 0, 12),
-        BackgroundTransparency = 1, FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Medium), TextSize = 11, TextXAlignment = Enum.TextXAlignment.Left, ZIndex = 6
+        Parent = Items.RightInfo, Text = getIdentityText(), TextColor3 = themes.preset.text,
+        AnchorPoint = vec2(1, 0), Position = dim2(1, -36, 0, 4), Size = dim2(0, 80, 0, 10),
+        BackgroundTransparency = 1, FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Medium), TextSize = 9, TextXAlignment = Enum.TextXAlignment.Right, ZIndex = 6
     })
     Bypass:Themify(Items.Username, "text", "TextColor3")
 
     Items.Status = Bypass:Create("TextLabel", {
-        Parent = Items.CenterInfo, Text = "Status: Premium", TextColor3 = themes.preset.subtext,
-        AnchorPoint = vec2(0, 0), Position = dim2(0, 44, 0, 18), Size = dim2(1, -44, 0, 10),
-        BackgroundTransparency = 1, FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Medium), TextSize = 9, TextXAlignment = Enum.TextXAlignment.Left, ZIndex = 6
+        Parent = Items.RightInfo, Text = "Status: Premium", TextColor3 = themes.preset.subtext,
+        AnchorPoint = vec2(1, 0), Position = dim2(1, -36, 0, 16), Size = dim2(0, 80, 0, 8),
+        BackgroundTransparency = 1, FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Medium), TextSize = 8, TextXAlignment = Enum.TextXAlignment.Right, ZIndex = 6
     })
     Bypass:Themify(Items.Status, "subtext", "TextColor3")
 
@@ -571,7 +511,6 @@ function Bypass:Window(properties)
     end
 
     function Cfg.ToggleMenu(bool)
-        if Cfg.Tweening then return end
         if bool == nil then uiVisible = not uiVisible else uiVisible = bool end
         if uiVisible and Cfg.IsMinimized then
             Cfg.SetMinimized(false)
@@ -628,13 +567,7 @@ function Bypass:Window(properties)
         end
     end)
 
-    Items.MinimizeBtn.MouseButton1Click:Connect(function()
-        Cfg.SetMinimized(not Cfg.IsMinimized)
-    end)
-
-    Items.CloseBtn.MouseButton1Click:Connect(function()
-        Cfg.ToggleMenu(false)
-    end)
+    -- Minimize and close button handlers removed
 
     task.defer(function()
         Bypass:CenterFrame(Items.Wrapper)
